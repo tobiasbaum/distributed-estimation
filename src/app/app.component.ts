@@ -1,3 +1,4 @@
+import { HttpClient } from '@angular/common/http';
 import { ChangeDetectorRef, NgZone } from '@angular/core';
 import { Component } from '@angular/core';
 import Peer from 'peerjs';
@@ -11,7 +12,8 @@ import { ParticipantStoreService } from './participant-store.service';
 })
 export class AppComponent {
   public state: string = 'initial';
-  public peer: Peer|undefined;
+  //public peer: Peer|undefined;
+  public peerId: string|undefined;
 
   public formData = {
     meetingID: this.getSettingValue('distEstMeetingID', '')
@@ -34,7 +36,8 @@ export class AppComponent {
   constructor(
     public fieldService: ParticipantStoreService,
     private cdr: ChangeDetectorRef,
-    private ngz: NgZone) {
+    private ngz: NgZone,
+    private http: HttpClient) {
   }
 
   public isVoter(): boolean {
@@ -67,34 +70,45 @@ export class AppComponent {
 
   private createPeer(targetState: string, idToJoin: string | undefined) {
     //var peer = new Peer(undefined, {host: 'localhost', port: 9000, key: 'peerjs', debug: 2});
-    this.peer = new Peer(undefined, 
-      {
-        config: {
-          iceServers: [
-            {urls: 'stun:stun.l.google.com:19302' },
-            {urls: 'turn:v2202012136631136755.bestsrv.de', username: 'ideenmesse', credential: 'clarifying-behind-anchoring-storyboard'}
-          ]
-        }
-      }
-    );
-    this.peer.on('error', (err: any) => {
-        console.log(err);
-    });
-    (this.peer as any).once('open', (id: string) => {
-        this.ngz.run(() => this.initParticipant(targetState, idToJoin));
-    });
+    // this.peer = new Peer(undefined, 
+    //   {
+    //     config: {
+    //       iceServers: [
+    //         {urls: 'stun:stun.l.google.com:19302' },
+    //         {urls: 'turn:v2202012136631136755.bestsrv.de', username: 'ideenmesse', credential: 'clarifying-behind-anchoring-storyboard'}
+    //       ]
+    //     }
+    //   }
+    // );
+    // this.peer.on('error', (err: any) => {
+    //     console.log(err);
+    // });
+    // (this.peer as any).once('open', (id: string) => {
+    //     this.ngz.run(() => this.initParticipant(targetState, idToJoin));
+    // });
+    this.http.post('/init', {})
+      .subscribe((result: any) => {
+        this.peerId = result;
+        this.initParticipant(targetState, idToJoin);
+      })
   }
 
   private initParticipant(targetState: string, idToJoin: string | undefined) {
+    let urlKey;
+    if (idToJoin) {
+      urlKey = idToJoin;
+    } else {
+      urlKey = this.peerId as string;
+    }
+
     this.fieldService.init(new Participant(
-      this.peer, 
+      this.http, 
+      urlKey,
       this.getOrGenerateName(),
       true,
       targetState === 'admin',
       () => this.ngz.run(() => this.cdr.markForCheck())));
-    if (idToJoin) {
-      this.fieldService.participant.connectTo(idToJoin);
-    }
+    this.fieldService.participant.connectTo(urlKey);
     this.state = targetState;
   }
 
@@ -124,10 +138,10 @@ export class AppComponent {
   }
 
   private getLink(prefix: string): string {
-    if (!this.peer) {
+    if (!this.peerId) {
       return '';
     }
-    return window.location.href.split('?')[0] + "?distEstMeetingID=" + prefix + this.peer.id;
+    return window.location.href.split('?')[0] + "?distEstMeetingID=" + prefix + this.peerId;
   }
 
   public reconnect() {

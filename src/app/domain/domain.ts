@@ -1,8 +1,18 @@
-import { RTCDB } from 'rtcdb';
+//import { RTCDB } from 'rtcdb';
+
+import { HttpClient } from "@angular/common/http";
+import { timer } from "rxjs";
 
 interface ItemDto {
   boldText: string;
   text: string;
+}
+
+interface DbDto {
+  items: any,
+  topVotes: any,
+  estimates: any,
+  state: {state: string}
 }
 
 class VotesPerItem {
@@ -118,7 +128,7 @@ class VotesPerItem {
 class VoteSummary {
   private items: Map<string, VotesPerItem> = new Map();
 
-  constructor(db: RTCDB) {
+  constructor(db: Db) {
     db.forEach('items', (id, dta) => {
       let sid = id as string;      
       this.items.set(sid, new VotesPerItem(sid, dta.boldText, dta.text));
@@ -183,21 +193,21 @@ class VoteSummary {
   
 class Participant {
   public readonly name: string;
-  private readonly db: RTCDB;
+  private readonly db: Db;
   public readonly markCallback;
 
   private currentItemId: string|undefined;
-  private cachedSummary: VoteSummary|undefined;
 
   private addedItemCount: number = 0;
 
-  constructor(peer: any, ownName: string, clean: boolean, admin: boolean, markCallback: Function) {
+  constructor(http: HttpClient, urlKey: string, ownName: string, clean: boolean, admin: boolean, markCallback: Function) {
     this.name = ownName;
     this.markCallback = markCallback;
-    this.db = new RTCDB('distEst.' + ownName, peer, clean);
-    this.db.on(['add', 'update'], 'items', false, () => this.invalidateCache());
-    this.db.on(['add', 'update'], 'topVotes', false, () => this.invalidateCache());
-    this.db.on(['add', 'update'], 'estimates', false, () => this.invalidateCache());
+    this.db = new Db(http, urlKey);
+    // this.db = new RTCDB('distEst.' + ownName, peer, clean);
+    // this.db.on(['add', 'update'], 'items', false, () => this.invalidateCache());
+    // this.db.on(['add', 'update'], 'topVotes', false, () => this.invalidateCache());
+    // this.db.on(['add', 'update'], 'estimates', false, () => this.invalidateCache());
 
     if (clean && admin) {
       this.db.put('state', 'state', 'running');
@@ -231,14 +241,8 @@ class Participant {
     return this.db.put('state', 'state', state);
   }
 
-  private invalidateCache() {
-    this.cachedSummary = undefined;
-    this.markCallback();
-    console.log('invalidate cache');
-  }
-
   public connectTo(idToJoin: string): void {
-    this.db.connectToNode(idToJoin);
+    this.db.setUrlKey(idToJoin);
   }
 
   public hasNoTopVote(): boolean {
@@ -345,21 +349,108 @@ class Participant {
   }
 
   public get voteSummary(): VoteSummary {
-    if (!this.cachedSummary) {
-      this.cachedSummary = new VoteSummary(this.db);
-    }
-    return this.cachedSummary;
+    return new VoteSummary(this.db);
   }
 
   voteForTop(itemId: string) {
     this.startEstimating(itemId);
     this.db.put('topVotes', this.name, itemId);
-    this.invalidateCache();
   }
 }
 
 function curTime(): string {
   return new Date().toLocaleTimeString('de-DE', {hour: '2-digit', minute:'2-digit'});
 }
+
+class Db {
+  private dbCache: DbDto = {
+    items: {},
+    estimates: {},
+    topVotes: {},
+    state: {state: 'running'}
+  };
+  private getRunning: boolean = false;
+  private putRunning: boolean = false;
+  private lastGet: number = 0;
+
+  constructor(
+    private http: HttpClient,
+    private urlKey: string
+  ) {
+    window.setInterval(() => {
+      this.triggerGet();
+    }, 2000);
+  }
+  
+  setUrlKey(uk: string) {
+    this.urlKey = uk;
+  }
+
+  public put(db: string, key: string, value: any) {
+    let dca = this.dbCache as any;
+    if (!dca[db]) {
+      dca[db] = {}
+    }
+    dca[db][key] = value;
+    console.log('put ' + db + ' ' + key + ' ' + value);
+    this.putRunning = true;
+    this.http.post('/putValue', {
+      urlKey: this.urlKey,
+      db: db,
+      key: key,
+      value: value
+    }).subscribe((data: any) => {
+      this.putRunning = false;
+    },
+    (error: any) => {
+      this.putRunning = false;
+      console.log('error ' + error);
+    });
+  }
+  
+  public get(db: string, key: string) {
+    this.triggerGet();
+    let dbObj = (this.dbCache as any)[db];
+    if (!dbObj) {
+      return undefined;
+    }
+    return dbObj[key];
+  }
+  
+  public forEach(db: string, f: (key: string, value: any) => void) {
+    this.triggerGet();
+    let obj : any = (this.dbCache as any)[db];
+    if (!obj) {
+      return;
+    }
+    Object.keys(obj).forEach(id => f(id, obj[id]));
+  }  
+
+  private triggerGet() {
+    if (this.getRunning || this.putRunning) {
+      return;
+    }
+    let now = new Date().getTime();
+    if (now - this.lastGet < 1000) {
+      return;
+    }
+    this.lastGet = now;
+    this.getRunning = true;
+    this.http.post('/getDb', {
+      urlKey: this.urlKey
+    }).subscribe((data: any) => {
+      this.getRunning = false;
+      if (!this.putRunning) {
+        this.dbCache = data;
+      }
+    },
+    (error: any) => {
+      this.getRunning = false;
+      console.log('error ' + error);
+    });
+  }
+}
+
+
 
 export { Participant, VotesPerItem };

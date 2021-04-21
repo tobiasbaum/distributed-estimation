@@ -3,6 +3,7 @@ import { NgModule } from '@angular/core';
 
 import { AppComponent } from './app.component';
 import { FormsModule } from '@angular/forms';
+import { HttpClientModule } from '@angular/common/http';
 import { PeerStatusComponent } from './peer-status/peer-status.component';
 import { registerLocaleData } from '@angular/common';
 import localeDe from '@angular/common/locales/de';
@@ -16,6 +17,7 @@ registerLocaleData(localeDe);
   ],
   imports: [
     BrowserModule,
+    HttpClientModule,
     FormsModule
   ],
   providers: [],
