@@ -9,6 +9,7 @@ interface ItemDto {
 }
 
 interface DbDto {
+  time: number,
   items: any,
   topVotes: any,
   estimates: any,
@@ -367,6 +368,7 @@ function curTime(): string {
 
 class Db {
   private dbCache: DbDto = {
+    time: 0,
     items: {},
     estimates: {},
     topVotes: {},
@@ -374,6 +376,7 @@ class Db {
   };
   private getRunning: boolean = false;
   private putRunning: boolean = false;
+  private putQueue: any[] = [];
   private lastGet: number = 0;
 
   constructor(
@@ -396,19 +399,41 @@ class Db {
     }
     dca[db][key] = value;
     console.log('put ' + db + ' ' + key + ' ' + value);
-    this.putRunning = true;
-    this.http.post('/putValue', {
+    let data = {
       urlKey: this.urlKey,
       db: db,
       key: key,
       value: value
-    }).subscribe((data: any) => {
+    };
+    this.putQueue.push(data);
+    this.putFromQueue();
+  }
+
+  private putFromQueue() {
+    if (this.putRunning) {
+      return;
+    }
+    if (this.putQueue.length == 0) {
+      return;
+    }
+    this.putRunning = true;
+    let data = this.putQueue.shift();
+    this.http.post('/putValue', data).subscribe((data: any) => {
+      this.updateIfNewer(data);
       this.putRunning = false;
+      this.putFromQueue();
     },
     (error: any) => {
       this.putRunning = false;
+      this.putFromQueue();
       console.log('error ' + error);
     });
+  }
+
+  private updateIfNewer(data: any) {
+    if (data.time > this.dbCache.time) {
+      this.dbCache = data;
+    }
   }
   
   public get(db: string, key: string) {
@@ -443,8 +468,8 @@ class Db {
       urlKey: this.urlKey
     }).subscribe((data: any) => {
       this.getRunning = false;
-      if (!this.putRunning) {
-        this.dbCache = data;
+      if (!this.putRunning && this.putQueue.length == 0) {
+        this.updateIfNewer(data);
       }
     },
     (error: any) => {
