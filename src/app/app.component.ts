@@ -195,16 +195,25 @@ export class AppComponent {
       }
       estimate += ',' + val1 + ',' + val2;
     }
+
     this.participant.saveEstimate(estimate);
+
+    this.getSelectElement('estimationForm', 'moneyAmount').value = '';
+    this.getSelectElement('estimationForm', 'timeAmount').value = '';
+    this.getSelectElement('estimationForm', 'personAmount').value = '';
     this.getRadioList('estimationForm', 'estimationType')
       .forEach(item => (item as HTMLInputElement).checked = false);
+
     this.itemNumber++;
   }
 
   private getSelectValue(formName: string, selectName: string): string {
+    return this.getSelectElement(formName, selectName).value;
+  }
+
+  private getSelectElement(formName: string, selectName: string) {
     let form = document.forms.namedItem(formName);
-    let sel = form?.elements.namedItem(selectName) as HTMLSelectElement;
-    return sel.value;
+    return form?.elements.namedItem(selectName) as HTMLSelectElement;
   }
 
   private getRadioList(formName: string, radioName: string) {

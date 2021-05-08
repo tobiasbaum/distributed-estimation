@@ -52,6 +52,7 @@
           <td>
             <label for="Zeit">spart Zeit, und zwar je Person
               <select name="timeAmount" (click)="activateEstimationType('Zeit')">
+                <option value="">-- bitte Dauer wählen</option>
                 <optgroup label="pro Tag">
                   <option value="4">ca. 1 Minute pro Tag</option>
                   <option value="20">ca. 5 Minuten pro Tag</option>
@@ -100,6 +101,7 @@
               </select>
               für insgesamt
               <select name="personAmount" (click)="activateEstimationType('Zeit')">
+                <option value="">-- bitte Personenanzahl wählen</option>
                 <option value="1">1 Person</option>
                 <option value="2">2 Personen</option>
                 <option value="3">3 Personen</option>
@@ -119,6 +121,7 @@
           <td>
             <label for="Geld">spart oder bringt Geld, und zwar
               <select name="moneyAmount" (click)="activateEstimationType('Geld')">
+                <option value="">-- bitte Betrag wählen</option>
                 <option value="500">ca. 500 EUR pro Jahr</option>
                 <option value="1000">ca. 1.000 EUR pro Jahr</option>
                 <option value="2000">ca. 2.000 EUR pro Jahr</option>
