@@ -112,7 +112,7 @@ class VotesPerItem {
       return 0;
     }
     let product;
-    if (parts[0] == 'Geld') {
+    if (parts[0] == 'Geld' || parts[0] == 'Risiko') {
       product = 1;
     } else if (parts[0] == 'Zeit') {
       product = 50;

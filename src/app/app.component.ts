@@ -195,12 +195,33 @@ export class AppComponent {
       }
       estimate += ',' + val1 + ',' + val2;
     }
+    if (selection == 'Risiko') {
+      let val1 = this.getSelectValue('estimationForm', 'freqAmountBefore');
+      if (!val1) {
+        alert('Bitte wählen Sie eine Vorher-Häufigkeit aus!');
+        return;
+      }
+      let val2 = this.getSelectValue('estimationForm', 'damageAmountBefore');
+      if (!val2) {
+        alert('Bitte wählen Sie eine Vorher-Schadenshöhe aus!');
+        return;
+      }
+      let val3 = this.getSelectValue('estimationForm', 'riskReduction');
+      if (!val3) {
+        alert('Bitte wählen Sie die Verringerung der Wahrscheinlichkeit aus!');
+        return;
+      }
+      estimate += ',' + val1 + ',' + val2 + ',' + val3;
+    }
 
     this.participant.saveEstimate(estimate);
 
     this.getSelectElement('estimationForm', 'moneyAmount').value = '';
     this.getSelectElement('estimationForm', 'timeAmount').value = '';
     this.getSelectElement('estimationForm', 'personAmount').value = '';
+    this.getSelectElement('estimationForm', 'freqAmountBefore').value = '';
+    this.getSelectElement('estimationForm', 'damageAmountBefore').value = '';
+    this.getSelectElement('estimationForm', 'riskReduction').value = '';
     this.getRadioList('estimationForm', 'estimationType')
       .forEach(item => (item as HTMLInputElement).checked = false);
 

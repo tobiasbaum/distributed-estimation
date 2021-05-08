@@ -138,6 +138,82 @@
           </td>
         </tr>
         <tr>
+          <td style="vertical-align:top;">
+            <input type="radio" name="estimationType" value="Risiko" id="Risiko" />
+          </td>
+          <td>
+            <label for="Risiko">verringert ein Risiko: Ohne den Vorschlag tritt
+              <select name="freqAmountBefore" (click)="activateEstimationType('Risiko')" style="max-width:15em;">
+                <option value="">-- bitte Häufigkeit wählen</option>
+                <option value="240">ca. einmal pro Tag</option>
+                <option value="48">ca. einmal pro Woche</option>
+                <option value="12">ca. einmal pro Monat</option>
+                <option value="4">ca. einmal pro Quartal</option>
+                <option value="1">ca. einmal pro Jahr</option>
+                <option value="0.5">ca. alle 2 Jahre (d.h. mit Wahrscheinlichkeit 50% pro Jahr)</option>
+                <option value="0.2">ca. alle 5 Jahre (d.h. mit Wahrscheinlichkeit 20% pro Jahr)</option>
+                <option value="0.1">ca. alle 10 Jahre (d.h. mit Wahrscheinlichkeit 10% pro Jahr)</option>
+                <option value="0.05">ca. alle 20 Jahre (d.h. mit Wahrscheinlichkeit 5% pro Jahr)</option>
+                <option value="0.02">ca. alle 50 Jahre (d.h. mit Wahrscheinlichkeit 2% pro Jahr)</option>
+                <option value="0.01">ca. alle 100 Jahre (d.h. mit Wahrscheinlichkeit 1% pro Jahr)</option>
+                <option value="0.005">ca. alle 200 Jahre (d.h. mit Wahrscheinlichkeit 0,5% pro Jahr)</option>
+                <option value="0.002">ca. alle 500 Jahre (d.h. mit Wahrscheinlichkeit 0,2% pro Jahr)</option>
+                <option value="0.001">ca. alle 1000 Jahre (d.h. mit Wahrscheinlichkeit 0,1% pro Jahr)</option>
+              </select>
+              ein Schaden in Höhe von
+              <select name="damageAmountBefore" (click)="activateEstimationType('Risiko')">
+                <option value="">-- bitte Betrag wählen</option>
+                <optgroup label="Geld">
+                  <option value="10">ca. 10 EUR</option>
+                  <option value="20">ca. 20 EUR</option>
+                  <option value="50">ca. 50 EUR</option>
+                  <option value="100">ca. 100 EUR</option>
+                  <option value="200">ca. 200 EUR</option>
+                  <option value="500">ca. 500 EUR</option>
+                  <option value="1000">ca. 1.000 EUR</option>
+                  <option value="2000">ca. 2.000 EUR</option>
+                  <option value="5000">ca. 5.000 EUR</option>
+                  <option value="10000">ca. 10.000 EUR</option>
+                  <option value="20000">ca. 20.000 EUR</option>
+                  <option value="50000">ca. 50.000 EUR</option>
+                  <option value="100000">ca. 100.000 EUR</option>
+                  <option value="200000">ca. 200.000 EUR</option>
+                  <option value="500000">ca. 500.000 EUR</option>
+                  <option value="1000000">ca. 1.000.000 EUR</option>
+                  <option value="2000000">ca. 2.000.000 EUR</option>
+                  <option value="5000000">ca. 5.000.000 EUR</option>
+                  <option value="10000000">ca. 10.000.000 EUR</option>
+                </optgroup>
+                <optgroup label="Zeit">
+                  <option value="8.33">ca. 5 Minuten</option>
+                  <option value="12.5">ca. 15 Minuten</option>
+                  <option value="25">ca. 30 Minuten</option>
+                  <option value="50">ca. 1 Stunde</option>
+                  <option value="100">ca. 2 Stunden</option>
+                  <option value="200">ca. 1/2 Tag</option>
+                  <option value="400">ca. 1 Tag</option>
+                  <option value="1000">ca. 1/2 Woche</option>
+                  <option value="2000">ca. 1 Woche</option>
+                </optgroup>
+              </select>
+              auf. Durch die Umsetzung verringert sich dessen Eintrittswahrscheinlichkeit um
+              <select name="riskReduction" (click)="activateEstimationType('Risiko')" style="max-width:15em;">
+                <option value="">-- bitte Risikoreduktion wählen</option>
+                <option value="0.01">ca. 1%</option>
+                <option value="0.02">ca. 2%</option>
+                <option value="0.05">ca. 5%</option>
+                <option value="0.1">ca. 10%</option>
+                <option value="0.3">ca. 30%</option>
+                <option value="0.5">ca. 50%</option>
+                <option value="0.7">ca. 70%</option>
+                <option value="0.9">ca. 90%</option>
+                <option value="0.99">ca. 99%</option>
+                <option value="1.0">100% (d.h. er kann nicht mehr auftreten)</option>
+              </select>
+            </label>
+          </td>
+        </tr>
+        <tr>
           <td>
             <input type="radio" name="estimationType" value="unknown" id="unknown" />
           </td>
