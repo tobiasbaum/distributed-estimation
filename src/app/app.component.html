@@ -175,7 +175,7 @@
         <td class="right">{{ item.relativeStandardDeviation | number: '1.0-0' : 'de' }}%</td>
         <td>{{ item.medianEstimate }}</td>
         <td>{{ item.allEstimates }}</td>
-        <td class="right">{{ item.finishedEstimateCount }}</td>
+        <td class="right">{{ item.finishedKnownEstimateCount }} ({{ item.finishedEstimateCount }})</td>
         <td class="right">{{ item.pendingEstimateCount }}</td>
       </tr>  
     </tbody>
@@ -184,6 +184,7 @@
   <br/>
   Anzahl abgegebener Top-Stimmen: {{this.participant.voteSummary.topVoteCount}}<br/>
   Minimale Anzahl Bewertungen: {{this.participant.voteSummary.minFinishedEstimateCount}}<br/>
+  Minimale Anzahl Bewertungen (ohne unbekannt): {{this.participant.voteSummary.minFinishedKnownEstimateCount}}<br/>
   Maximale Anzahl Bewertungen: {{this.participant.voteSummary.maxFinishedEstimateCount}}<br/>
   Anzahl Vorschläge: {{this.participant.voteSummary.sortedItems.length}}<br/>
   Status: {{this.participant.getState()}} <button (click)="this.participant.setState('ended')">Beenden</button> <button (click)="this.participant.setState('running')">Ende zurücknehmen</button><br/>

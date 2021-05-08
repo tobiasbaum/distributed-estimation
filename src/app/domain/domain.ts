@@ -20,6 +20,7 @@ class VotesPerItem {
   public topVoteCount: number = 0;
   public totalEstimateCount: number = 0;
   public finishedEstimateCount: number = 0;
+  public finishedKnownEstimateCount: number = 0;
   private estimateMultiset: Map<string, number> = new Map();
 
   constructor(
@@ -33,6 +34,9 @@ class VotesPerItem {
     this.totalEstimateCount++;
     if (estimate !== 'pending') {
       this.finishedEstimateCount++;
+      if (estimate !== 'unknown') {
+        this.finishedKnownEstimateCount++;
+      }
       if (this.estimateMultiset.has(estimate)) {
         this.estimateMultiset.set(estimate, this.estimateMultiset.get(estimate) as number + 1);
       } else {
@@ -185,6 +189,12 @@ class VoteSummary {
     return min;
   }
 
+  public get minFinishedKnownEstimateCount(): number {
+    let min = Number.POSITIVE_INFINITY;
+    this.items.forEach((value, key) => min = Math.min(min, value.finishedKnownEstimateCount));
+    return min;
+  }
+
   public get topVoteCount(): number {
     let sum = 0;
     this.items.forEach((value, key) => sum += value.topVoteCount);
@@ -310,12 +320,12 @@ class Participant {
     let c2 = this.pickRandom(notYetEstimated);
     console.log('c1=' + c1.id);
     console.log('c2=' + c2.id);
-    if (c1.finishedEstimateCount < c2.finishedEstimateCount
-      || (c1.finishedEstimateCount == c2.finishedEstimateCount && c1.totalEstimateCount < c2.totalEstimateCount)) {
-      console.log('pick one ' + c2.totalEstimateCount);
+    if (c1.finishedKnownEstimateCount < c2.finishedKnownEstimateCount
+      || (c1.finishedKnownEstimateCount == c2.finishedKnownEstimateCount && c1.totalEstimateCount < c2.totalEstimateCount)) {
+      console.log('pick c1');
       this.startEstimating(c1.id);
     } else {
-      console.log('pick other' + c1.totalEstimateCount);
+      console.log('pick c2');
       this.startEstimating(c2.id);
     }
   }
