@@ -86,11 +86,16 @@ export class AppComponent {
     // (this.peer as any).once('open', (id: string) => {
     //     this.ngz.run(() => this.initParticipant(targetState, idToJoin));
     // });
-    this.http.post('/init', {})
-      .subscribe((result: any) => {
-        this.peerId = result;
-        this.initParticipant(targetState, idToJoin);
-      })
+    if (idToJoin) {
+      this.peerId = idToJoin;
+      this.initParticipant(targetState, idToJoin);
+    } else {
+      this.http.post('/init', {})
+        .subscribe((result: any) => {
+          this.peerId = result;
+          this.initParticipant(targetState, idToJoin);
+        })
+    }
   }
 
   private initParticipant(targetState: string, idToJoin: string | undefined) {
